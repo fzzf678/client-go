@@ -428,6 +428,10 @@ func (s *KVStore) Close() error {
 	if s.txnLatches != nil {
 		s.txnLatches.Close()
 	}
+	if _, err := util.EvalFailpoint("populateStoreCacheBeforeClosingRegionCache"); err == nil {
+		s.regionCache.SetRegionCacheStore(1, "store", "store", tikvrpc.TiKV, 1, nil)
+	}
+	_, _ = util.EvalFailpoint("sleepAfterClosingPDClientBeforeClosingRegionCache")
 	s.regionCache.Close()
 
 	if err := s.kv.Close(); err != nil {

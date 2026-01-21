@@ -418,7 +418,7 @@ func (s *KVStore) Close() error {
 
 	s.oracle.Close()
 	s.pdClient.Close()
-	lg.Info("pdClient closed")
+	lg.Info("pdClient closed", zap.Int64("ts_unix_ns", time.Now().UnixNano()))
 	if s.pdHttpClient != nil {
 		s.pdHttpClient.Close()
 	}
@@ -431,9 +431,9 @@ func (s *KVStore) Close() error {
 	if s.txnLatches != nil {
 		s.txnLatches.Close()
 	}
-	lg.Info("before close region cache", zap.Int("len(s.regionCache.GetAllStores())", len(s.regionCache.GetAllStores())))
+	lg.Info("before close region cache", zap.Int64("ts_unix_ns", time.Now().UnixNano()), zap.Int("len(s.regionCache.GetAllStores())", len(s.regionCache.GetAllStores())))
 	s.regionCache.Close()
-	lg.Info("regionCache closed")
+	lg.Info("regionCache closed", zap.Int64("ts_unix_ns", time.Now().UnixNano()))
 	if err := s.kv.Close(); err != nil {
 		return err
 	}

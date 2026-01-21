@@ -470,6 +470,7 @@ func (s *Store) reResolve(c storeCache, scheduler *bgRunner, regionCacheUUID str
 	if err != nil && !isStoreNotFoundError(err) {
 		logutil.BgLogger().Error("loadStore from PD failed",
 			zap.String("uuid", regionCacheUUID),
+			zap.Int64("ts_unix_ns", time.Now().UnixNano()),
 			zap.Uint64("id", s.storeID), zap.Error(err),
 			zap.Bool("scheduler.closed()", scheduler.closed()),
 		)

@@ -430,6 +430,7 @@ func (s *KVStore) Close() error {
 	}
 	s.regionCache.Close()
 
+	logutil.BgLogger().Info("kv store closed")
 	if err := s.kv.Close(); err != nil {
 		return err
 	}

@@ -468,7 +468,9 @@ func (s *Store) reResolve(c storeCache, scheduler *bgRunner) (bool, error) {
 	// If load Store from PD is successful but PD didn't find the store
 	// the err should be handled by next `if` instead of here
 	if err != nil && !isStoreNotFoundError(err) {
-		logutil.BgLogger().Error("loadStore from PD failed", zap.Uint64("id", s.storeID), zap.Error(err))
+		logutil.BgLogger().Error("loadStore from PD failed", zap.Uint64("id", s.storeID), zap.Error(err),
+			zap.Bool("scheduler.closed()", scheduler.closed()),
+		)
 		// we cannot do backoff in reResolve loop but try check other store and wait tick.
 		return false, err
 	}

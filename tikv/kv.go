@@ -409,6 +409,7 @@ func (s *KVStore) GetSnapshot(ts uint64) *txnsnapshot.KVSnapshot {
 
 // Close store
 func (s *KVStore) Close() error {
+	lg := logutil.BgLogger().With(zap.String("uuid", s.uuid))
 	defer s.gP.Close()
 	s.close.Store(true)
 	s.cancel()
@@ -416,6 +417,7 @@ func (s *KVStore) Close() error {
 
 	s.oracle.Close()
 	s.pdClient.Close()
+	lg.Info("pdClient closed")
 	if s.pdHttpClient != nil {
 		s.pdHttpClient.Close()
 	}
@@ -428,9 +430,9 @@ func (s *KVStore) Close() error {
 	if s.txnLatches != nil {
 		s.txnLatches.Close()
 	}
+	lg.Info("before close region cache", zap.Int("len(s.regionCache.GetAllStores())", len(s.regionCache.GetAllStores())))
 	s.regionCache.Close()
-
-	logutil.BgLogger().Info("kv store closed")
+	lg.Info("regionCache closed")
 	if err := s.kv.Close(); err != nil {
 		return err
 	}

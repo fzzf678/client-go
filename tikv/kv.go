@@ -269,6 +269,7 @@ func NewKVStore(uuid string, pdClient pd.Client, spkv SafePointKV, tikvclient Cl
 	regionCache := locate.NewRegionCache(pdClient, locate.WithRequestHealthFeedbackCallback(func(ctx context.Context, addr string) error {
 		return requestHealthFeedbackFromKVClient(ctx, addr, tikvclient)
 	}))
+	regionCache.UUID = uuid
 	store := &KVStore{
 		clusterID:       pdClient.GetClusterID(context.TODO()),
 		uuid:            uuid,

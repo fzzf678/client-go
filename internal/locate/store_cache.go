@@ -456,7 +456,7 @@ func (s *Store) initResolve(bo *retry.Backoffer, c storeCache) (addr string, err
 
 // reResolve try to resolve addr for store that need check. Returns false if the region is in tombstone state or is
 // deleted.
-func (s *Store) reResolve(c storeCache, scheduler *bgRunner) (bool, error) {
+func (s *Store) reResolve(c storeCache, scheduler *bgRunner, regionCacheUUID string) (bool, error) {
 	var addr string
 	store, err := c.fetchStore(context.Background(), s.storeID)
 	if err != nil {
@@ -468,7 +468,9 @@ func (s *Store) reResolve(c storeCache, scheduler *bgRunner) (bool, error) {
 	// If load Store from PD is successful but PD didn't find the store
 	// the err should be handled by next `if` instead of here
 	if err != nil && !isStoreNotFoundError(err) {
-		logutil.BgLogger().Error("loadStore from PD failed", zap.Uint64("id", s.storeID), zap.Error(err),
+		logutil.BgLogger().Error("loadStore from PD failed",
+			zap.String("uuid", regionCacheUUID),
+			zap.Uint64("id", s.storeID), zap.Error(err),
 			zap.Bool("scheduler.closed()", scheduler.closed()),
 		)
 		// we cannot do backoff in reResolve loop but try check other store and wait tick.
@@ -659,7 +661,7 @@ func startHealthCheckLoop(scheduler *bgRunner, c storeCache, s *Store, liveness 
 		if t.Sub(lastCheckPDTime) > reResolveInterval {
 			lastCheckPDTime = t
 
-			valid, err := s.reResolve(c, scheduler)
+			valid, err := s.reResolve(c, scheduler, "")
 			if err != nil {
 				logutil.BgLogger().Warn("[health check] failed to re-resolve unhealthy store", zap.Error(err))
 			} else if !valid {

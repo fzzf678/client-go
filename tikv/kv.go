@@ -348,7 +348,10 @@ func (s *KVStore) runSafePointChecker() {
 				d = gcSafePointUpdateInterval
 			} else {
 				metrics.TiKVLoadSafepointCounter.WithLabelValues("fail").Inc()
-				logutil.BgLogger().Error("fail to load safepoint from pd", zap.Error(err))
+				logutil.BgLogger().Error("fail to load safepoint from pd",
+					zap.String("uuid", s.uuid),
+					zap.Int64("ts_unix_ns", time.Now().UnixNano()),
+					zap.Error(err))
 				d = gcSafePointQuickRepeatInterval
 			}
 		case <-s.ctx.Done():
